@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "Q/nYYlFQ4xjQCi94L/Z4/uGLLOs=",
+			"path": "github.com/sabhiram/go-git-ignore",
+			"revision": "228fcfa2a06e870a3ef238d54c45ea847f492a37",
+			"revisionTime": "2016-01-16T02:08:57Z"
+		}
+	],
+	"rootPath": "github.com/fd/tar-utils"
+}
