@@ -1,0 +1,2 @@
+COPY bin/x-tar-darwin-amd64/x-tar .
+CHMOD 0755 x-tar
