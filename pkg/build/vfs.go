@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/sabhiram/go-git-ignore"
 )
@@ -490,17 +491,19 @@ func (d *Dir) writeEntriesToTar(path string, w *tar.Writer) error {
 	return nil
 }
 
+var ftime = time.Date(1988, time.February, 1, 0, 0, 0, 0, time.UTC)
+
 func (d *Dir) writeToTar(path string, w *tar.Writer) error {
 	h := tar.Header{
-		Typeflag: tar.TypeDir,
-		Mode:     int64(d.Perm | c_ISDIR),
-		Name:     path + "/",
-		Uname:    d.User,
-		Gname:    d.Group,
-		Size:     0,
-		// AccessTime:
-		// ChangeTime:
-		// ModTime:
+		Typeflag:   tar.TypeDir,
+		Mode:       int64(d.Perm | c_ISDIR),
+		Name:       path + "/",
+		Uname:      d.User,
+		Gname:      d.Group,
+		Size:       0,
+		AccessTime: ftime,
+		ChangeTime: ftime,
+		ModTime:    ftime,
 	}
 
 	err := w.WriteHeader(&h)
@@ -518,15 +521,15 @@ func (f *File) writeToTar(path string, w *tar.Writer) error {
 	}
 
 	h := tar.Header{
-		Typeflag: tar.TypeReg,
-		Mode:     int64(f.Perm | c_ISREG),
-		Name:     path,
-		Uname:    f.User,
-		Gname:    f.Group,
-		Size:     int64(len(data)),
-		// AccessTime:
-		// ChangeTime:
-		// ModTime:
+		Typeflag:   tar.TypeReg,
+		Mode:       int64(f.Perm | c_ISREG),
+		Name:       path,
+		Uname:      f.User,
+		Gname:      f.Group,
+		Size:       int64(len(data)),
+		AccessTime: ftime,
+		ChangeTime: ftime,
+		ModTime:    ftime,
 	}
 
 	err = w.WriteHeader(&h)

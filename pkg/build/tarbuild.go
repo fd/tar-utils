@@ -44,7 +44,7 @@ func Build(dst io.Writer, wd, conf string) error {
 		w   = tar.NewWriter(&buf)
 	)
 
-	err = dstFS.writeEntriesToTar("/", w)
+	err = dstFS.writeEntriesToTar("", w)
 	if err != nil {
 		return err
 	}

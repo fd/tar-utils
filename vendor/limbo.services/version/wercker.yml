@@ -1,0 +1,53 @@
+box: simonmenke/go-build:latest
+
+build:
+  steps:
+  - setup-go-workspace:
+      package-dir: limbo.services/version
+
+  - script:
+      name: "go install"
+      code: |
+        CGO_ENABLED=0 go install -v ./cmd/v5n .
+
+  - script:
+      name: "go test"
+      code: |
+        go test -v ./cmd/v5n .
+
+  - script:
+      name: "go build"
+      code: |
+        CGO_ENABLED=0 GOOS=linux  GOARCH=amd64 go build -o ${WERCKER_OUTPUT_DIR}/bin/v5n-linux-amd64/v5n  ./cmd/v5n
+        CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o ${WERCKER_OUTPUT_DIR}/bin/v5n-darwin-amd64/v5n ./cmd/v5n
+
+deploy:
+  steps:
+  - script:
+      name: "Pull secrets"
+      code: |
+        curl -# https://gist.githubusercontent.com/fd/354eed3ebf924565741f0df980d11741/raw/sec.pem | sec dec | tar -C $HOME -x
+        eval "$(install-creds)"
+  - script:
+      name: "Push release"
+      code: |
+        mkdir -p dist
+        if [[ "$WERCKER_DEPLOYTARGET_NAME" == "prerelease" ]]; then
+          VERSION="$(v5n store bump v5n rc)"
+          v5n apply --commit $WERCKER_GIT_COMMIT --author "Simon Menke" bin/v5n-linux-amd64/v5n  "$VERSION"
+          v5n apply --commit $WERCKER_GIT_COMMIT --author "Simon Menke" bin/v5n-darwin-amd64/v5n "$VERSION"
+          tar -C bin/v5n-linux-amd64  -f dist/v5n-linux-amd64.tar.gz  -cz .
+          tar -C bin/v5n-darwin-amd64 -f dist/v5n-darwin-amd64.tar.gz -cz .
+          ghr -u limbo-services -r version -c $WERCKER_GIT_COMMIT --replace --prerelease "v$VERSION" ./dist
+        else
+          VERSION="$(v5n store bump v5n final+patch)"
+          v5n apply --commit $WERCKER_GIT_COMMIT --author "Simon Menke" bin/v5n-linux-amd64/v5n  "$VERSION"
+          v5n apply --commit $WERCKER_GIT_COMMIT --author "Simon Menke" bin/v5n-darwin-amd64/v5n "$VERSION"
+          tar -C bin/v5n-linux-amd64  -f dist/v5n-linux-amd64.tar.gz  -cz .
+          tar -C bin/v5n-darwin-amd64 -f dist/v5n-darwin-amd64.tar.gz -cz .
+          ghr -u limbo-services -r version -c $WERCKER_GIT_COMMIT --replace "v$VERSION" ./dist
+        fi
+  - mbrevda/wercker-triggerbuild@0.0.10:
+      token: $WRK_TOKEN
+      application_id: $WRK_APP
+      message: Triggered from v5n
