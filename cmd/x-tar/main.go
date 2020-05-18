@@ -8,10 +8,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/fd/tar-utils/pkg/build"
-
+	tarbuild "github.com/fd/tar-utils/pkg/build"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"limbo.services/version"
 )
 
 func main() {
@@ -29,7 +27,7 @@ func run() error {
 		outputTar   string
 	)
 
-	app := kingpin.New("x-tar", "Tar utilities").Version(version.Get().String()).Author(version.Get().ReleasedBy)
+	app := kingpin.New("x-tar", "Tar utilities").Version("1.0").Author("Simon Menke")
 
 	buildCmd := app.Command("build", "Make a new tar file")
 	buildCmd.Arg("context-dir", "The context directory for the build").Default(".").ExistingDirVar(&contextDir)
